@@ -48,7 +48,7 @@ Tested: Playing Music
 Not Tested: Anything else.
 
 
-##Issues.
+## Issues.
 
 The update is packaged in an 8GB archive in Apple's proprietary pbzx format.
 (it's actually a pbzx archive inside a disk image inside a xar archive…)
@@ -56,11 +56,11 @@ This format has no index and no way to easily extract specified files.
 Unfortunately this script currently traverses the whole thing, even thought the desired files are right at the beginning of the archive.
 I don't know the best way to terminate the process after the itunes files are extracted.
 
-###Why?
+### Why?
 
 I don't know. I liked to sort by iTunes library by "Date Added". When I tried to import my library into the new Music app, that data is lost.
 
-##Thanks
+## Thanks
 
 Bundled the pbzx tool fork from [https://github.com/NiklasRosenstein/pbzx](https://github.com/NiklasRosenstein/pbzx)  
 Info.plist patch instruction from [MacRumors](https://forums.macrumors.com/threads/itunes-12-6-5-3-on-apple-silicon.2354390/)
