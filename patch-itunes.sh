@@ -12,7 +12,7 @@ MUSIC="\xf0\x9f\x8e\xb5"
 EXL="\xe2\x9d\x97\x00"
 BOX="\xf0\x9f\x93\xa6"
 HAMMER="\xF0\x9F\x94\xA8"
-SIGN="\xE2\x9C\x8D\xEF\xB8\x8F"
+SIGN="\xF0\x9F\x94\x8F"
 PROMPTTXT="Press [ENTER] to continue or [CTRL+C] to cancel"
 EXITTXT="Press [ENTER] to exit"
 ITURL="http://swcdn.apple.com/content/downloads/17/32/061-26589-A_8GJTCGY9PC/25fhcu905eta7wau7aoafu8rvdm7k1j4el/InstallESDDmg.pkg"
@@ -59,20 +59,29 @@ if [ $FREESPACE -gt $SPACENEEDED ];
 if [ $NOSPACE -ne 0 ];
 	then echo "Current Free Space: $(( FREESPACE / 1000000 ))MB"
 	echo "Please Free Up $(( $((SPACENEEDED - FREESPACE)) / 1000000  ))MB on your root filesystem, then run this script again."
+	echo ""
 	read "?$EXITTXT"
 	exit 1
 fi
 
 if [[ ! -f $PBZXBIN ]];
 	then echo "Error: Cannot find bundled pbzx binary. Please ensure you run this script in the directory it came in."
+	echo ""
+	read "?$EXITTXT"
 	exit 1
 fi
-	
+
+echo ""
 read "?$PROMPTTXT"
 echo ""
 # Set up working directory 
 TMP=`mktemp -d`
 cd $TMP
+
+## TODO - exit trap to clean up tmpdir in case of crash
+## TODO see if InstallESDDmg.pkg is present in $SCRIPTDIR, and dont download if it is.
+## TODO - check cksum if using local installesddmg.pkg.
+
 
 #Download installer package
 echo "Downloading InstallESDDmg.pkg to $TMP"
@@ -80,11 +89,13 @@ curl --output-dir "$TMP" -O "$ITURL"
 echo ""
 
 # It's a box within a box within a box
-echo "Extracting iTunes (be patient, this takes a while) $BOX"
-echo "Expect a delay after the filenames appear on screen"
+echo "Extracting iTunes (please be patient, this takes a while) $BOX"
+echo ""
+echo "> Expanding Installer"
 pkgutil --expand-full $TMP/InstallESDDmg.pkg $TMP/installer
 
-##mount the dmg. quit if we fail.
+##mount the dmg. quit if we fail, try again. if we keep failing, abort.
+echo "> Mounting Installer"
 MOUNTPOINT=`hdiutil mount $TMP/installer/InstallESD.dmg`
 if [ $? != 0 ]; then
 	i=0
@@ -104,21 +115,25 @@ fi
 
 MOUNTPOINT=`echo $MOUNTPOINT | grep /Volumes | awk '{print $3}'`
 
-#######****
-## must add error handling for the mount.
-#### try mounting it once.
-#### While loop, add one if repeated fails, and then on third fail, abort.
-#### on completion, hdiutil info or something and get the mount point that way.
 
-$PBZXBIN $MOUNTPOINT/Packages/Core.pkg | cpio -idv "./Applications/iTunes.app"
+### scan through the archive beginning to end.
+### Once all the iTunes files are extracted, quit scanning.
+echo "> Extracting iTunes Bundle"
+$PBZXBIN $MOUNTPOINT/Packages/Core.pkg > >(cpio -idv "./Applications/iTunes.app" &> /dev/null ) &
+processnumber=$!
+while [[ ! -s "$TMP/Applications/iTunes.app/Contents/version.plist" ]]
+	do
+	sleep 5;
+	done
+kill -15 $processnumber
 # I would like a way to terminate this once itunes has extracted.
 #at present it continues traversing the whole huge archive, and iTunes is right at the beginning!
 
 #Let's eject the installer disk now. We have what we want.
-hdiutil eject $MOUNTPOINT
+hdiutil eject -quiet $MOUNTPOINT
 
 echo "Extraction Complete"
-echo "$HAMMERNow Patching iTunes"
+echo "$HAMMER Patching iTunes"
 echo ""
 
 BUNDLE="$TMP/Applications/iTunes.app"
@@ -161,22 +176,45 @@ chmod 755 $ITBINDIR/iTunes
 #Codesign
 touch $BUNDLE
 echo ""
-echo "$SIGNCodesigning bundle with self identifier - please enter sudo password"
+echo "$SIGN Codesigning bundle with self identifier - please enter sudo password"
 sudo codesign -s - -f --deep $BUNDLE
 
-ditto $BUNDLE /Applications/iTunes.app
+if [[ -a /Applications/iTunes.app ]]; then
+	echo "ERR: iTunes.app already found in /Applications. Copying to $SCRIPTDIR instead."
+	ditto "$BUNDLE" "$SCRIPTDIR/iTunes.app"
+	ITUNESLOC="$SCRIPTDIR/iTunes.app"
+else
+	echo "Copying iTunes.app to Applications."	
+	ITUNESLOC="/Applications/iTunes.app"
+	ditto "$BUNDLE" /Applications/iTunes.app
+fi
 
-
+echo ""
 echo "All Done, cleaning up now."
 echo "Deleting temp directory."
 
 
-mv $TMP/InstallESDDmg.pkg ~/Downloads/
+mv $TMP/InstallESDDmg.pkg $SCRIPTDIR
 rm -r $TMP
+echo ""
+echo ""
+echo "> Job Done."
+echo "$BOX InstallESDDMG.pkg was moved to $SCRIPTDIR"
+echo "   You can safely delete this file."
+echo ""
+echo "$MUSIC iTunes was moved to $ITUNESLOC"
+echo ""
+if [[ -a ~/Music/iTunes/iTunes\ Library.itl ]]; then
+	open "$ITUNESLOC" &
+	else
+	echo "NOTE: $EXL"
+	echo "iTunes Library.itl NOT FOUND."
+	echo "Ensure some file exists at ~/Music/iTunes/iTunes Library.itl before running."
+	echo "Otherwise iTunes will just crash with unknown error 13021"
+	echo ""
+fi
+echo "THATS ALL FOLKS!"
 
-echo "Job Done."
-echo "InstallESDDMG.pkg moved to Downloads folder. If iTunes works you can delete it."
-echo "If iTunes is working you can delete this now."
 
 
-open /Applications/iTunes.app
+

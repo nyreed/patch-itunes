@@ -22,6 +22,20 @@ By patching the binary you avoid needing to disable SIP.
 4. Codesign the patched application (mandatory for ARM macs)."
 5. Install the app into /Applications."
 
+### NOTE
+
+For whatever reason, iTunes will NOT RUN if the following file is not present.
+
+	~/Music/iTunes/iTunes Library.itl
+
+It does not need to be a valid iTunes library, something just needs to be present.
+If not, iTunes will instead attempt to create iTunes Library files in ~/.Trash, and crash with a "deny(1) file-write-data" error.
+I have no idea why.  
+
+Additionally, if the following files are not present, iTunes will crash on first run, but will create these files, and then run fine the second time.
+
+	~/Music/iTunes/iTunes Library Extras.itdb	~/Music/iTunes/iTunes Library Genius.itdb
+
 
 ## Usage
 
@@ -34,17 +48,11 @@ follow the prompts.
 ## Tested
 Script tested on Monterey 12.5.1 in an M1 VM and 12.6.2 on an M1 mac, and 12.6 on an intel mac.
 
-The resulting app bundle might not run for you…
-Strangely the app will only run on my M1 mac. The same binary 
-that runs on the M1 fails to run properly in the VM or on the intel mac. 
-The app runs, but immediately crashes with "An unknown error occurred 
-(13021)."
-It is not a codesigning issue as the app does run briefly. I think 
-it's an issue with the environment. Very strange… 
-Let me know how it goes for you…
+"An unknown error occured -42408" on startup, I think relating to iTunes Store connectivity (which isn't working)
 
 iTunes (if it runs)
-Tested: Playing Music
+Working: Playing Music  
+Not Working: iTunes Store, Update Genius.  
 Not Tested: Anything else.
 
 
