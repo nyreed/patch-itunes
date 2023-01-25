@@ -2,7 +2,7 @@ patch-itunes.sh
 
 # Install iTunes on Modern Version of MacOS
 
-##Script to install 12.9.5.5 on modern versions of MacOS _WITHOUT_ disabling SIP.
+## Script to install 12.9.5.5 on modern versions of MacOS _WITHOUT_ disabling SIP.
 
 A simple script to download and install the latest version of iTunes, and patch it to run on modern version of MacOS and M1 Processors.
 
@@ -11,10 +11,10 @@ This is complicated because:
 1. The only official place to download it is bundled with the MacOS 10.14.6 updater.  
 2.	The app binary itself uses executable_path expansion to link to its bundled gracenote libraries. This causes Arm macs to forbid the code to run due to their security model.
 
-Tools like Retroactive suggest a need to disable SIP to get around this problem. This is disadvantageous because it is arguably less secure, and it prevents iOS apps running via catalyst.
+Tools like [Retroactive](https://github.com/cormiertyshawn895/Retroactive) suggest a need to disable SIP to get around this problem. This is disadvantageous because it is arguably less secure, and it prevents iOS apps running via catalyst.
 By patching the binary you avoid needing to disable SIP.
 
-###This script will simply
+### This script will simply
 
 1. Download MacOS 10.14.6 updater (5.54GB)"
 2. Extract the iTunes.app bundle from the updater."
@@ -50,10 +50,10 @@ Script tested on Monterey 12.5.1 in an M1 VM and 12.6.2 on an M1 mac, and 12.6 o
 
 "An unknown error occured -42408" on startup, I think relating to iTunes Store connectivity (which isn't working)
 
-iTunes (if it runs)
+iTunes
 Working: Playing Music  
 Not Working: iTunes Store, Update Genius.  
-Not Tested: Anything else.
+Not Tested: Anything else. Some clever people in the [Retroactive Project](https://github.com/cormiertyshawn895/Retroactive) know more about this I think.
 
 
 ## Issues.
@@ -66,7 +66,7 @@ I don't know the best way to terminate the process after the itunes files are ex
 
 ### Why?
 
-I don't know. I liked to sort by iTunes library by "Date Added". When I tried to import my library into the new Music app, that data is lost.
+I don't know. I liked to sort by iTunes library by "Date Added". When I tried to import my library into the new Music app, that data is lost. Also the search bar is in the wrong place in the music app.
 
 ## Thanks
 
