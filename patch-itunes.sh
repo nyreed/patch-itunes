@@ -199,20 +199,25 @@ rm -r $TMP
 echo ""
 echo ""
 echo "> Job Done."
+echo ""
 echo "$BOX InstallESDDMG.pkg was moved to $SCRIPTDIR"
 echo "   You can safely delete this file."
 echo ""
 echo "$MUSIC iTunes was moved to $ITUNESLOC"
 echo ""
 if [[ -a ~/Music/iTunes/iTunes\ Library.itl ]]; then
-	open "$ITUNESLOC" &
+		
 	else
+	mkdir -p ~/Music/iTunes
+	touch ~/Music/iTunes/iTunes\ Library.itl
 	echo "NOTE: $EXL"
-	echo "iTunes Library.itl NOT FOUND."
-	echo "Ensure some file exists at ~/Music/iTunes/iTunes Library.itl before running."
-	echo "Otherwise iTunes will just crash with unknown error 13021"
+	echo "iTunes Library.itl NOT FOUND. Creating dummy file."
+	echo "On first launch iTunes will create a library for you, then crash."
+	echo "Just open it again and it should run fine."
 	echo ""
 fi
+
+open "$ITUNESLOC" &
 echo "THATS ALL FOLKS!"
 
 

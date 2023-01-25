@@ -22,19 +22,23 @@ By patching the binary you avoid needing to disable SIP.
 4. Codesign the patched application (mandatory for ARM macs)."
 5. Install the app into /Applications."
 
-### NOTE
+### ISSUE
 
-For whatever reason, iTunes will NOT RUN if the following file is not present.
+For whatever reason, iTunes will CRASH with "An unknown error occured (13021)." if the following file is not present.
 
 	~/Music/iTunes/iTunes Library.itl
+	
+If not, iTunes will instead attempt to create iTunes Library files in ~/.Trash, and crash with a "deny(1) file-write-data" error. How strange.
 
-It does not need to be a valid iTunes library, something just needs to be present.
-If not, iTunes will instead attempt to create iTunes Library files in ~/.Trash, and crash with a "deny(1) file-write-data" error.
-I have no idea why.  
+As long as something, anything, is present at ~/Music/iTunes/iTunes Library.itl, iTunes will run. If it's not a real library file, iTunes will create one its place, and also create the following files.
 
-Additionally, if the following files are not present, iTunes will crash on first run, but will create these files, and then run fine the second time.
+	~/Music/iTunes/iTunes Library Extras.itdb
+	~/Music/iTunes/iTunes Library Genius.itdb
+	~/Music/iTunes/Album Artwork
+	~/Music/iTunes/iTunes Media
+	~/Music/iTunes/Previous iTunes Libraries
 
-	~/Music/iTunes/iTunes Library Extras.itdb	~/Music/iTunes/iTunes Library Genius.itdb
+This script will create a dummy file at ~/Music/iTunes/iTunes Library.itl so that iTunes will run.
 
 
 ## Usage
@@ -48,21 +52,15 @@ follow the prompts.
 ## Tested
 Script tested on Monterey 12.5.1 in an M1 VM and 12.6.2 on an M1 mac, and 12.6 on an intel mac.
 
-"An unknown error occured -42408" on startup, I think relating to iTunes Store connectivity (which isn't working)
+On launch you get "An unknown error occured -42408", I think relating to iTunes Store connectivity (which doesn't work.) 
+Apparently disabling iTunes Store in Restrictions makes the message go away.
+
+I guess the Retroactive guys have iTunes store working at the expense of turning off SIP.
 
 iTunes
 Working: Playing Music  
 Not Working: iTunes Store, Update Genius.  
-Not Tested: Anything else. Some clever people in the [Retroactive Project](https://github.com/cormiertyshawn895/Retroactive) know more about this I think.
-
-
-## Issues.
-
-The update is packaged in an 8GB archive in Apple's proprietary pbzx format.
-(it's actually a pbzx archive inside a disk image inside a xar archive…)
-This format has no index and no way to easily extract specified files.
-Unfortunately this script currently traverses the whole thing, even thought the desired files are right at the beginning of the archive.
-I don't know the best way to terminate the process after the itunes files are extracted.
+Not Tested: Anything else. Some clever people in the [Retroactive Project](https://github.com/cormiertyshawn895/Retroactive) know more about this I think. They have instructions on iPod sync and things.
 
 ### Why?
 
